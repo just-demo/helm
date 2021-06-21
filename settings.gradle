@@ -1,0 +1,3 @@
+rootProject.name = 'helm'
+include 'demo'
+

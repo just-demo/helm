@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: demo
+  template:
+    metadata:
+      labels:
+        component: demo
+    spec:
+      containers:
+        - name: demo
+          image: demo:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent # Do not pull from Docker Hub
+          ports:
+            - containerPort: 8080
+          env:
+            - name: demo
+              value: {{ .Values.demo }} {{ template "current.time" . }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+spec:
+  type: LoadBalancer
+#  type: ClusterIP
+  selector:
+    component: demo
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8080

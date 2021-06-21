@@ -1,0 +1,39 @@
+# See last line how to point shell to minikube's docker-daemon:
+minikube docker-env
+# E.g. on Mac:
+eval $(minikube -p minikube docker-env)
+# Should be run inside minikube cluster to make sure images are created in its local cache, not host machine
+./gradlew bootBuildImage
+-----
+kubectl apply -f helm/templates
+kubectl get deployments
+-----
+# Expose all services via 127.0.0.1 and defined ports (e.g. 8080)
+# https://minikube.sigs.k8s.io/docs/commands/tunnel/
+# It works with LoadBalancer service types only!
+minikube tunnel
+-----
+kubectl delete -f helm/templates
+-----
+# Create chart skeleton
+helm create demo
+-----
+helm ls --all-namespaces
+
+helm install demo-default ./helm/demo
+helm ls
+kubectl get pods
+kubectl get services
+helm upgrade demo-default ./helm/demo
+helm uninstall demo-default
+
+helm install demo-dev ./helm/demo --namespace dev --create-namespace --set service.port=8081 --values ./helm/demo/config/dev.yaml
+helm ls --namespace dev
+kubectl get pods -n dev
+kubectl get services -n dev
+helm upgrade demo-dev ./helm/demo --namespace dev --set service.port=8081 --values ./helm/demo/config/dev.yaml
+helm uninstall demo-dev --namespace dev
+
+# delete all releases
+helm delete $(helm ls -q)
+helm delete $(helm ls -q -n dev) -n dev
